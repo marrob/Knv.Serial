@@ -11,6 +11,8 @@ namespace Knv.Serial
         bool _disposed = false;
         readonly bool _simualtion = false;
 
+        public string LastErrorMessage { get; set; }
+
         public Serial(string port, int baudrate, bool simulation)
         {
             _simualtion = simulation;
@@ -40,14 +42,31 @@ namespace Knv.Serial
                     data[i] = (byte)new Random().Next(0, 255);
                 return;
             }
-            _serialPort.Read(data = new byte[count], 0, count);
+            try
+            {
+                _serialPort.Read(data = new byte[count], 0, count);
+            }
+            catch (Exception ex)
+            { 
+                LastErrorMessage = ex.Message;
+                data = new byte[count];
+            }
         }
 
         public int Read()
         {
             if (_simualtion)
                 return new Random().Next(0, 255);
-            return _serialPort.ReadByte();
+            int i = 0;
+            try
+            {
+                i = _serialPort.ReadByte();
+            }
+            catch (Exception ex)
+            {
+                LastErrorMessage = ex.Message;
+            }
+            return i;
         }   
 
         public void Dispose()
